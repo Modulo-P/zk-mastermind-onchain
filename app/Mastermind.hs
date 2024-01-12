@@ -19,17 +19,21 @@ import PlutusLedgerApi.V2.Contexts
   )
 import PlutusLedgerApi.V1.Interval  (contains)
 import PlutusLedgerApi.V2.Tx  (OutputDatum (..))
-import PlutusTx (compile, CompiledCode)
+import PlutusTx (compile, CompiledCode, toBuiltinData)
 import PlutusTx.Prelude
 import Data.ByteString qualified as B
 import Data.ByteString.Base16 qualified as Base16
 import Data.ByteString.Short qualified as B
-import Types (GameDatum (..), GameRedeemer (..))
+import Types (GameDatum (..), GameRedeemer (..), Turn (..))
+import Groth16 (VerificationKey, verify)
 import qualified Prelude
+
+instance Eq VerificationKey where
+  (==) vk1 vk2 = (toBuiltinData vk1) == (toBuiltinData vk2)
 
 {-# INLINEABLE zkValidator #-}
 zkValidator :: GameDatum -> GameRedeemer -> ScriptContext -> Bool
-zkValidator d r ctx = case r of
+zkValidator d r ctx = case turn r of
   Start ->
     traceIfFalse "Incorrect turn counter" (currentTurn d == 0)
       && traceIfFalse "Value not conserved" ( valueFromScript == valueToScript + valueToScript)
@@ -47,7 +51,7 @@ zkValidator d r ctx = case r of
       && traceIfFalse "Tx not signed" (txSignedBy txInfo (codeBreaker d))
       && traceIfFalse "Signatures alteration" (codeMaster d == codeMaster getNewDatum) && (codeBreaker d == codeBreaker getNewDatum)
       && traceIfFalse "Hashsol cannot be modified" (hashSol d == hashSol getNewDatum)
-      -- && traceIfFalse "Vk cannot be modified" (vk d == vk getNewDatum)
+      && traceIfFalse "Vk cannot be modified" (vk d == vk getNewDatum)
       && traceIfFalse "Wrong expiration set" (expirationTime getNewDatum  == expirationTime d + 3600000)
   Clue ->
     traceIfFalse "Incorrect turn counter" (currentTurn d + 1 == currentTurn getNewDatum)
@@ -57,9 +61,9 @@ zkValidator d r ctx = case r of
       && traceIfFalse "Tx not signed" (txSignedBy txInfo (codeMaster d))
       && traceIfFalse "Signatures alteration" (codeMaster d == codeMaster getNewDatum) && (codeBreaker d == codeBreaker getNewDatum)
       && traceIfFalse "Hashsol cannot be modified" (hashSol d == hashSol getNewDatum)
-      -- && traceIfFalse "Vk cannot be modified" (vk d == vk getNewDatum)
+      && traceIfFalse "Vk cannot be modified" (vk d == vk getNewDatum)
       && traceIfFalse "Wrong expiration set" (expirationTime getNewDatum  == expirationTime d + 3600000)
-      -- && traceIfFalse "zk-proof failure" zkVerification (vk d) (proof d) (hashSol d) (guesses d) (blackPegs d) (whitePegs d)
+      && traceIfFalse "zk-proof failure" (verify (vk d) (proof r) ([(hashSol d)] ++ (guesses d) ++ [(whitePegs d)] ++ [(blackPegs d)]))
   End -> 
     (blackPegs d == 4 && (modulo (currentTurn d) 2 == 0) && txSignedBy txInfo (codeBreaker d)) -- CodeBreaker wins
       || (blackPegs d < 4 && currentTurn d == 10 && txSignedBy txInfo (codeMaster d)) -- CodeMaster wins

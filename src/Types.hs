@@ -6,6 +6,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE InstanceSigs #-}
 
 module Types where
 
@@ -13,6 +14,10 @@ import PlutusTx.Prelude
 import GHC.Generics (Generic)
 import PlutusLedgerApi.V2(PubKeyHash, POSIXTime)
 import PlutusTx (unstableMakeIsData)
+import Groth16 (Proof, VerificationKey)
+
+unstableMakeIsData ''VerificationKey
+unstableMakeIsData ''Proof
 
 data GameDatum = GameDatum
   { codeMaster :: PubKeyHash,
@@ -24,22 +29,18 @@ data GameDatum = GameDatum
     currentTurn :: Integer,
     expirationTime :: POSIXTime,
     -- Verification
-    nPublic :: Integer,
-    vkAlpha1 :: [Integer],
-    vkBeta2 :: [[Integer]],
-    vkGamma2 :: [[Integer]],
-    vkDelta2 :: [[Integer]],
-    vkAlphabeta12 :: [[[Integer]]],
-    ic :: [[Integer]],
-    -- Proof
-    piA :: [Integer],
-    piB :: [[Integer]],
-    piC :: [Integer]
+    vk :: VerificationKey
   }
+  
   deriving (Generic)
+
 
 unstableMakeIsData ''GameDatum
 
-data GameRedeemer = Start | Clue | End | Guess
+data Turn = Start | Clue | End | Guess
+
+unstableMakeIsData ''Turn
+
+data GameRedeemer = GameRedeemer {proof :: Proof, turn :: Turn}
 
 unstableMakeIsData ''GameRedeemer
