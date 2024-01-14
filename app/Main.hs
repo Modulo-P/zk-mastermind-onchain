@@ -7,6 +7,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ImportQualifiedPost #-}
 
+--{-# OPTIONS_GHC -fplugin-opt PlutusTx.Plugin:dump-pir #-}
+
 module Main where
 
 import Mastermind (zkValidator)

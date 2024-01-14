@@ -67,9 +67,11 @@ common common
         -fno-strictness
         -fno-unbox-strict-fields
         -fno-unbox-small-strict-fields
-        -fplugin-opt PlutusTx.Plugin:defer-errors
-        -fplugin-opt PlutusTx.Plugin:target-version=1.1.0
-        -fplugin-opt PlutusTx.Plugin:verbosity=2
+        -fplugin-opt PlutusTx.Plugin:defer-errors 
+        ---fplugin-opt PlutusTx.Plugin: dump-pir
+        ---fplugin-opt PlutusTx.Plugin:target-version=1.1.0
+        ---fplugin-opt PlutusTx.Plugin:verbosity=2
+
 
     build-depends:
         base >=4.9 && <5,
@@ -90,8 +92,10 @@ common common
         serialise,
         cardano-ledger-babbage,
         cardano-ledger-alonzo,
-        cardano-ledger-core, 
+        cardano-ledger-core,
         base16-bytestring,
+        utilities,
+        
         
 
 

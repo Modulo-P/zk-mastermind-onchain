@@ -7,9 +7,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ImportQualifiedPost #-}
 
-{-# OPTIONS_GHC -fplugin-opt PlutusTx.Plugin:target-version=1.1.0 #-}
-
-
 module Mastermind where
 
 import PlutusLedgerApi.V2 (from, Datum (getDatum), FromData (fromBuiltinData), PubKeyHash (PubKeyHash), TxInInfo (TxInInfo, txInInfoResolved), TxOut (..), Value, serialiseCompiledCode)
@@ -25,9 +22,6 @@ import PlutusLedgerApi.V2.Tx  (OutputDatum (..))
 import PlutusTx (compile, CompiledCode, toBuiltinData)
 import PlutusTx.Trace 
 import PlutusTx.Prelude 
-import Data.ByteString qualified as B
-import Data.ByteString.Base16 qualified as Base16
-import Data.ByteString.Short qualified as B
 import Types (GameDatum (..), GameRedeemer (..), Turn (..))
 import Groth16 (VerificationKey, verify)
 
