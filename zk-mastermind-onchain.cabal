@@ -68,6 +68,8 @@ common common
         -fno-unbox-strict-fields
         -fno-unbox-small-strict-fields
         -fplugin-opt PlutusTx.Plugin:defer-errors
+        -fplugin-opt PlutusTx.Plugin:target-version=1.1.0
+        -fplugin-opt PlutusTx.Plugin:verbosity=2
 
     build-depends:
         base >=4.9 && <5,
@@ -90,6 +92,7 @@ common common
         cardano-ledger-alonzo,
         cardano-ledger-core, 
         base16-bytestring,
+        
 
 
 library
@@ -97,7 +100,7 @@ library
     import:           common
 
     -- Modules exported by the library.
-    exposed-modules:  Types, PlutusUtils
+    exposed-modules:  Types, PlutusUtils, Mastermind
 
     -- Modules included in this library but not exported.
     -- other-modules:
@@ -115,7 +118,7 @@ executable zk-mastermind-onchain
     import:           common
 
     -- .hs or .lhs file containing the Main module.
-    main-is:          Mastermind.hs
+    main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
     --other-modules: Types, PlutusUtils
@@ -143,7 +146,7 @@ test-suite zk-mastermind-onchain-test
     type:             exitcode-stdio-1.0
 
     -- Directories containing source files.
-    hs-source-dirs:   test
+    hs-source-dirs:   test, src, app
 
     -- The entrypoint to the test suite.
     main-is:          Test.hs
@@ -151,3 +154,7 @@ test-suite zk-mastermind-onchain-test
     -- Test dependencies.
     build-depends:
         base >=4.9 && <5,
+        plutus-simple-model,
+        QuickCheck ,
+        tasty ,
+        tasty-quickcheck,
