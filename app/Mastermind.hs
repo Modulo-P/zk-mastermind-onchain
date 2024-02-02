@@ -33,7 +33,7 @@ instance Eq VerificationKey where
 
 {-# INLINEABLE zkValidator #-}
 zkValidator :: GameDatum -> GameRedeemer -> ScriptContext -> Bool
-zkValidator d r ctx = case turn r of
+zkValidator d r ctx = case r of
   Start ->
     traceIfFalse "Incorrect turn counter" (currentTurn d == 0)
       && traceIfFalse "Value not conserved" ( valueFromScript == valueToScript + valueToScript)
@@ -63,7 +63,7 @@ zkValidator d r ctx = case turn r of
       && traceIfFalse "Hashsol cannot be modified" (hashSol d == hashSol getNewDatum)
       && traceIfFalse "Vk cannot be modified" (vk d == vk getNewDatum)
       && traceIfFalse "Wrong expiration set" (expirationTime getNewDatum  == expirationTime d + 3600000)
-      && traceIfFalse "zk-proof failure" (verify (vk d) (proof r) ([(hashSol d)] ++ (guesses d) ++ [(whitePegs d)] ++ [(blackPegs d)]))
+      && traceIfFalse "zk-proof failure" (verify (vk d) (proof d) ([(hashSol d)] ++ (guesses d) ++ [(whitePegs d)] ++ [(blackPegs d)]))
   End -> 
     (blackPegs d == 4 && (modulo (currentTurn d) 2 == 0) && txSignedBy txInfo (codeBreaker d)) -- CodeBreaker wins
       || (blackPegs d < 4 && currentTurn d == 10 && txSignedBy txInfo (codeMaster d)) -- CodeMaster wins

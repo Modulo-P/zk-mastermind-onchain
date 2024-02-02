@@ -30,17 +30,13 @@ data GameDatum = GameDatum
     expirationTime :: POSIXTime,
     -- Verification
     vk :: VerificationKey
+    proof :: Proof
   }
   
   deriving (Generic)
-
-
 unstableMakeIsData ''GameDatum
 
-data Turn = Start | Clue | End | Guess
 
-unstableMakeIsData ''Turn
 
-data GameRedeemer = GameRedeemer {proof :: Proof, turn :: Turn}
-
+data GameRedeemer = Start | Clue | End | Guess
 unstableMakeIsData ''GameRedeemer
