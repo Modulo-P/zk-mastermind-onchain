@@ -52,7 +52,7 @@ zkValidator d r ctx = case r of
       && traceIfFalse "Signatures alteration" (codeMaster d == codeMaster getNewDatum) && (codeBreaker d == codeBreaker getNewDatum)
       && traceIfFalse "Hashsol cannot be modified" (hashSol d == hashSol getNewDatum)
       && traceIfFalse "Vk cannot be modified" (vk d == vk getNewDatum)
-      && traceIfFalse "Wrong expiration set" (expirationTime getNewDatum  == expirationTime d + 3600000)
+      && traceIfFalse "Wrong expiration set" (expirationTime getNewDatum  == expirationTime d + 600000)
   Clue ->
     traceIfFalse "Incorrect turn counter" (currentTurn d + 1 == currentTurn getNewDatum)
       && traceIfFalse "Incorrect turn order" (modulo (currentTurn d) 2 == 1)
@@ -62,7 +62,7 @@ zkValidator d r ctx = case r of
       && traceIfFalse "Signatures alteration" (codeMaster d == codeMaster getNewDatum) && (codeBreaker d == codeBreaker getNewDatum)
       && traceIfFalse "Hashsol cannot be modified" (hashSol d == hashSol getNewDatum)
       && traceIfFalse "Vk cannot be modified" (vk d == vk getNewDatum)
-      && traceIfFalse "Wrong expiration set" (expirationTime getNewDatum  == expirationTime d + 3600000)
+      && traceIfFalse "Wrong expiration set" (expirationTime getNewDatum  == expirationTime d + 600000)
       && traceIfFalse "zk-proof failure" (verify (vk d) (proof d) ([(hashSol d)] ++ (guesses d) ++ [(whitePegs d)] ++ [(blackPegs d)]))
   End -> 
     (blackPegs d == 4 && (modulo (currentTurn d) 2 == 0) && txSignedBy txInfo (codeBreaker d)) -- CodeBreaker wins
@@ -72,7 +72,10 @@ zkValidator d r ctx = case r of
   where
     txInfo :: TxInfo
     txInfo = scriptContextTxInfo ctx
-
+    -- |                        CALCULAR EN EL START
+    -- |   TX ----- RANGO             START ------------- END 
+    -- |   now <------  (END - START) < 10 min ----> now = END
+    -- |  experationDate < now + 60min
     valueFromScript :: Value
     valueFromScript = case findOwnInput ctx of 
         Just TxInInfo {txInInfoResolved = TxOut {txOutValue = v}} -> v
