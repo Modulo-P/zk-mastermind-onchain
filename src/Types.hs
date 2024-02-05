@@ -29,7 +29,7 @@ data GameDatum = GameDatum
     currentTurn :: Integer,
     expirationTime :: POSIXTime,
     -- Verification
-    vk :: VerificationKey
+    vk :: VerificationKey,
     proof :: Proof
   }
   
