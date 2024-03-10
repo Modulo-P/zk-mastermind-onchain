@@ -15,15 +15,9 @@ packages:
 source-repository-package
     type: git
     location: https://github.com/Modulo-P/plutus-groth
-    tag: v0.0.2 
+    tag: v0.0.2
     --sha256: 1d1bv6ar06hm4xswhzcfs2i63d0cbdxcyyp7xprdv47v888r3m0m
 
 package cardano-crypto-praos
   flags: -external-libsodium-vrf
-
-
-
-
-
-
 

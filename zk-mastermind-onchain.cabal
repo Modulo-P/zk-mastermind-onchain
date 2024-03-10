@@ -68,6 +68,8 @@ common common
         -fno-unbox-strict-fields
         -fno-unbox-small-strict-fields
         -fplugin-opt PlutusTx.Plugin:defer-errors
+        -fplugin-opt PlutusTx.Plugin:target-version=1.0.0
+
 
     build-depends:
         base >=4.9 && <5,
@@ -97,7 +99,7 @@ library
     import:           common
 
     -- Modules exported by the library.
-    exposed-modules:  Types, PlutusUtils
+    exposed-modules:  Types, PlutusUtils, Mastermind
 
     -- Modules included in this library but not exported.
     -- other-modules:
@@ -115,7 +117,10 @@ executable zk-mastermind-onchain
     import:           common
 
     -- .hs or .lhs file containing the Main module.
-    main-is:          Mastermind.hs
+    main-is:          App.hs
+
+    build-depends:
+        zk-mastermind-onchain
 
     -- Modules included in this executable, other than Main.
     --other-modules: Types, PlutusUtils
@@ -125,7 +130,7 @@ executable zk-mastermind-onchain
 
 
     -- Directories containing source files.
-    hs-source-dirs:   app, src
+    hs-source-dirs:   app
 
     --ghc-options:      -main-is Mastermind
 
