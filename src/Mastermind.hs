@@ -76,7 +76,7 @@ zkValidator d r ctx = case r of
       && traceIfFalse "Hashsol cannot be modified" (hashSol d == hashSol getNewDatum)
       && traceIfFalse "Vk cannot be modified" (vk d == vk getNewDatum)
       && traceIfFalse "Wrong expiration set" (expirationTime getNewDatum  == expirationTime d + 1200000)
-      && traceIfFalse "zk-proof failure" (verify (vk d) (proof d) ([(hashSol d)] ++ (guesses d) ++ [(whitePegs d)] ++ [(blackPegs d)]))
+      -- && traceIfFalse "zk-proof failure" (verify (vk d) (proof d) ([(hashSol d)] ++ (guesses d) ++ [(whitePegs d)] ++ [(blackPegs d)]))
   End ->
     (blackPegs d == 4 && (modulo (currentTurn d) 2 == 0) && txSignedBy txInfo (codeBreaker d)) -- CodeBreaker wins
       || (blackPegs d < 4 && currentTurn d == 10 && txSignedBy txInfo (codeMaster d)) -- CodeMaster wins
