@@ -57,7 +57,7 @@ zkValidator d r ctx = case r of
       && traceIfFalse "Valid Range too long." ((getUpperPosixInstant (ivTo $ txInfoValidRange txInfo) - getLowerPosixInstant (ivFrom $ txInfoValidRange txInfo) <= 1200000))
   Guess ->
     traceIfFalse "Incorrect turn counter" (currentTurn d + 1 == currentTurn getNewDatum)
-      && traceIfFalse "Incorrect turn order" (modulo (currentTurn d) 2 == 0)
+      && traceIfFalse "Incorrect turn order" (modulo (currentTurn getNewDatum) 2 == 1)
       && traceIfFalse "Closed party" (currentTurn d < 10)
       && traceIfFalse "Value not conserved" (valueToScript == valueFromScript)
       && traceIfFalse "Guess incorrect length" (length (guesses getNewDatum) == 4)
@@ -68,8 +68,8 @@ zkValidator d r ctx = case r of
       && traceIfFalse "Wrong expiration set" (expirationTime getNewDatum  == expirationTime d + 1200000)
   Clue ->
     traceIfFalse "Incorrect turn counter" (currentTurn d + 1 == currentTurn getNewDatum)
-      && traceIfFalse "Incorrect turn order" (modulo (currentTurn d) 2 == 1)
-      && traceIfFalse "Closed party" (currentTurn d <= 10)
+      && traceIfFalse "Incorrect turn order" (modulo (currentTurn getNewDatum) 2 == 0)
+      && traceIfFalse "Closed party" (currentTurn d < 10)
       && traceIfFalse "Value not conserved" (valueToScript == valueFromScript)
       && traceIfFalse "Tx not signed" (txSignedBy txInfo (codeMaster d))
       && traceIfFalse "Signatures alteration" (codeMaster d == codeMaster getNewDatum) && (codeBreaker d == codeBreaker getNewDatum)
@@ -78,7 +78,7 @@ zkValidator d r ctx = case r of
       && traceIfFalse "Wrong expiration set" (expirationTime getNewDatum  == expirationTime d + 1200000)
       -- && traceIfFalse "zk-proof failure" (verify (vk d) (proof d) ([(hashSol d)] ++ (guesses d) ++ [(whitePegs d)] ++ [(blackPegs d)]))
   End ->
-    (blackPegs d == 4 && (modulo (currentTurn d) 2 == 0) && txSignedBy txInfo (codeBreaker d)) -- CodeBreaker wins
+    (blackPegs d == 4 && currentTurn d <= 10  && txSignedBy txInfo (codeBreaker d)) -- CodeBreaker wins
       || (blackPegs d < 4 && currentTurn d == 10 && txSignedBy txInfo (codeMaster d)) -- CodeMaster wins
       || expirationReached && (modulo (currentTurn d) 2 == 1) && txSignedBy txInfo (codeBreaker d) --  CodeBreaker wins by deafult.
       || expirationReached && (modulo (currentTurn d) 2 == 0) && txSignedBy txInfo (codeMaster d) --  CodeMaster wins by deafult.
