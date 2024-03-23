@@ -24,7 +24,9 @@ import           PlutusLedgerApi.V2          (Datum (getDatum),
                                               Interval (..),
                                               PubKeyHash (PubKeyHash),
                                               TxInInfo (TxInInfo, txInInfoResolved),
-                                              TxOut (..), Value, from,
+                                              TxOut (..),
+                                              UnsafeFromData (unsafeFromBuiltinData),
+                                              Value, from,
                                               serialiseCompiledCode)
 import           PlutusLedgerApi.V2.Contexts (ScriptContext (scriptContextTxInfo),
                                               TxInfo (txInfoValidRange),
@@ -47,7 +49,7 @@ zkValidator :: GameDatum -> GameRedeemer -> ScriptContext -> Bool
 zkValidator d r ctx = case r of
   Start ->
     traceIfFalse "Incorrect turn counter" (currentTurn d == 0)
-      && traceIfFalse "Value not conserved" ( valueFromScript == valueToScript + valueToScript)
+      && traceIfFalse "Value not conserved" ( valueFromScript + valueFromScript == valueToScript)
       && traceIfFalse "Guess incorrect length" (length (guesses getNewDatum) == 4)
       && traceIfFalse "Incorrect new datum" (currentTurn getNewDatum == 1)
       && traceIfFalse "Tx not signed" (txSignedBy txInfo (codeBreaker getNewDatum))
@@ -76,7 +78,7 @@ zkValidator d r ctx = case r of
       && traceIfFalse "Hashsol cannot be modified" (hashSol d == hashSol getNewDatum)
       && traceIfFalse "Vk cannot be modified" (vk d == vk getNewDatum)
       && traceIfFalse "Wrong expiration set" (expirationTime getNewDatum  == expirationTime d + 1200000)
-      -- && traceIfFalse "zk-proof failure" (verify (vk d) (proof d) ([(hashSol d)] ++ (guesses d) ++ [(whitePegs d)] ++ [(blackPegs d)]))
+      && traceIfFalse "zk-proof failure" (verify (vk getNewDatum) (proof getNewDatum) ([(hashSol getNewDatum)] ++ (guesses getNewDatum) ++ [(blackPegs getNewDatum)] ++ [(whitePegs getNewDatum)] ++ [(hashSol getNewDatum)]))
   End ->
     (blackPegs d == 4 && currentTurn d <= 10  && txSignedBy txInfo (codeBreaker d)) -- CodeBreaker wins
       || (blackPegs d < 4 && currentTurn d == 10 && txSignedBy txInfo (codeMaster d)) -- CodeMaster wins
@@ -117,5 +119,6 @@ zkValidator d r ctx = case r of
     expirationReached = contains (from $ expirationTime d) $ txInfoValidRange txInfo
 
 
-compiledZkValidator :: CompiledCode (GameDatum -> GameRedeemer -> ScriptContext -> Bool)
-compiledZkValidator = $$(compile [|| zkValidator ||])
+
+compiledZkValidator :: CompiledCode (BuiltinData -> BuiltinData -> BuiltinData -> ())
+compiledZkValidator = $$(compile [|| \d r s ->  check $ zkValidator (unsafeFromBuiltinData d) (unsafeFromBuiltinData r) (unsafeFromBuiltinData s) ||])

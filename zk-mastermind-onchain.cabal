@@ -156,3 +156,6 @@ test-suite zk-mastermind-onchain-test
     -- Test dependencies.
     build-depends:
         base >=4.9 && <5,
+        zk-mastermind-onchain,
+        tasty,
+        tasty-hunit
