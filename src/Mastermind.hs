@@ -19,12 +19,12 @@ import           PlutusCore.Pretty           (Pretty (pretty))
 import           PlutusLedgerApi.V1.Interval (Extended (..), LowerBound (..),
                                               UpperBound (..), contains)
 import           PlutusLedgerApi.V1.Time     (POSIXTime)
-import           PlutusLedgerApi.V2          (Datum (getDatum),
+import           PlutusLedgerApi.V2          (Datum (Datum, getDatum),
                                               FromData (fromBuiltinData),
                                               Interval (..),
                                               PubKeyHash (PubKeyHash),
                                               TxInInfo (TxInInfo, txInInfoResolved),
-                                              TxOut (..),
+                                              TxInfo (txInfoData), TxOut (..),
                                               UnsafeFromData (unsafeFromBuiltinData),
                                               Value, from,
                                               serialiseCompiledCode)
@@ -35,6 +35,7 @@ import           PlutusLedgerApi.V2.Contexts (ScriptContext (scriptContextTxInfo
 import           PlutusLedgerApi.V2.Tx       (OutputDatum (..))
 import           PlutusTx                    (CompiledCode, compile, getPlc,
                                               toBuiltinData)
+import           PlutusTx.AssocMap           (lookup)
 import           PlutusTx.Prelude
 import           Prelude                     (putStr)
 import qualified Prelude
@@ -107,7 +108,11 @@ zkValidator d r ctx = case r of
       OutputDatum ns -> case fromBuiltinData (getDatum ns) of
         Just nd -> nd
         Nothing -> traceError "datum wrong type"
-      _ -> traceError "datum not found"
+      OutputDatumHash h -> case lookup h (txInfoData txInfo) of
+        Just (Datum d) -> case fromBuiltinData d of
+          Just nd -> nd
+          Nothing -> traceError "datum wrong type"
+      NoOutputDatum -> traceError "datum not found"
 
     getUpperPosixInstant :: UpperBound POSIXTime -> POSIXTime
     getUpperPosixInstant (UpperBound (Finite t) _) = t
